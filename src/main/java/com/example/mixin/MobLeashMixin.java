@@ -5,6 +5,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.animal.allay.Allay;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.vehicle.AbstractMinecart;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -37,8 +38,9 @@ public abstract class MobLeashMixin {
             return distance;
         }
 
-        // Check if player is flying with elytra
-        if (player.isFallFlying()) {
+        // Check if player is flying with elytra or riding in a minecart
+        boolean isInMinecart = player.getVehicle() instanceof AbstractMinecart;
+        if (player.isFallFlying() || isInMinecart) {
             // Scale down the perceived distance so the leash doesn't break as easily
             // If actual distance is 20 and we multiply by 0.5, it appears as 10 to the vanilla check
             double scaleFactor = AllayLeashConfig.NORMAL_LEASH_DISTANCE / AllayLeashConfig.ELYTRA_LEASH_DISTANCE;
