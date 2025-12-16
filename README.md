@@ -1,4 +1,6 @@
-# Fabric Example Mod
+# Allay Leash Enhanced
+
+Enhanced leash functionality for Allays in Minecraft.
 
 ## Setup
 
