@@ -1,16 +1,16 @@
 package com.example.mixin;
 
 import com.example.AllayLeashConfig;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.passive.AllayEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.animal.allay.Allay;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(AllayEntity.class)
+@Mixin(Allay.class)
 public abstract class AllaySpeedBoostMixin {
 
     /**
@@ -19,11 +19,11 @@ public abstract class AllaySpeedBoostMixin {
      */
     @Inject(method = "tick", at = @At("TAIL"))
     private void boostSpeedDuringElytraFlight(CallbackInfo ci) {
-        AllayEntity allay = (AllayEntity) (Object) this;
+        Allay allay = (Allay) (Object) this;
 
         // Check if the allay is leashed
-        Entity leashHolder = allay.getHoldingEntity();
-        if (!(leashHolder instanceof PlayerEntity player)) {
+        Entity leashHolder = allay.getLeashHolder();
+        if (!(leashHolder instanceof Player player)) {
             return;
         }
 
@@ -41,24 +41,24 @@ public abstract class AllaySpeedBoostMixin {
         }
 
         // Calculate direction vector from allay to player
-        Vec3d toPlayer = player.getPos().subtract(allay.getPos()).normalize();
+        Vec3 toPlayer = player.position().subtract(allay.position()).normalize();
 
         // Get current velocity
-        Vec3d currentVelocity = allay.getVelocity();
+        Vec3 currentVelocity = allay.getDeltaMovement();
 
         // Calculate boosted velocity towards player
-        Vec3d boostVelocity = toPlayer.multiply(AllayLeashConfig.ALLAY_ELYTRA_SPEED_MULTIPLIER);
+        Vec3 boostVelocity = toPlayer.scale(AllayLeashConfig.ALLAY_ELYTRA_SPEED_MULTIPLIER);
 
         // Combine current velocity with boost (weighted average for smoother movement)
-        Vec3d newVelocity = currentVelocity.multiply(0.5).add(boostVelocity.multiply(0.5));
+        Vec3 newVelocity = currentVelocity.scale(0.5).add(boostVelocity.scale(0.5));
 
         // Cap the speed to prevent extreme velocities
         double speed = newVelocity.length();
         if (speed > AllayLeashConfig.ALLAY_MAX_SPEED) {
-            newVelocity = newVelocity.normalize().multiply(AllayLeashConfig.ALLAY_MAX_SPEED);
+            newVelocity = newVelocity.normalize().scale(AllayLeashConfig.ALLAY_MAX_SPEED);
         }
 
         // Apply the new velocity
-        allay.setVelocity(newVelocity);
+        allay.setDeltaMovement(newVelocity);
     }
 }

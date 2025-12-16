@@ -1,17 +1,17 @@
 package com.example.mixin;
 
 import com.example.AllayLeashConfig;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.mob.MobEntity;
-import net.minecraft.entity.passive.AllayEntity;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.animal.allay.Allay;
+import net.minecraft.world.entity.player.Player;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(MobEntity.class)
+@Mixin(Mob.class)
 public abstract class MobLeashMixin {
 
     /**
@@ -24,16 +24,16 @@ public abstract class MobLeashMixin {
         ordinal = 0
     )
     private double modifyLeashDistance(double distance) {
-        MobEntity mob = (MobEntity) (Object) this;
+        Mob mob = (Mob) (Object) this;
 
         // Only modify distance for Allays
-        if (!(mob instanceof AllayEntity)) {
+        if (!(mob instanceof Allay)) {
             return distance;
         }
 
         // Check if the mob is leashed to a player
-        Entity leashHolder = mob.getHoldingEntity();
-        if (!(leashHolder instanceof PlayerEntity player)) {
+        Entity leashHolder = mob.getLeashHolder();
+        if (!(leashHolder instanceof Player player)) {
             return distance;
         }
 
